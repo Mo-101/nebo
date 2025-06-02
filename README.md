@@ -1,30 +1,76 @@
-# Next.js HTML Conversion
+# NEBO - Futuristic Next.js with CesiumJS Integration
 
-*Automatically synced with your [v0.dev](https://v0.dev) deployments*
-
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/mo-101s-projects/v0-next-js-html-conversion)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.dev-black?style=for-the-badge)](https://v0.dev/chat/projects/I6PauLlkFhn)
+[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js%2015-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Powered by CesiumJS](https://img.shields.io/badge/Powered%20by-CesiumJS-blue?style=for-the-badge&logo=cesium)](https://cesium.com/)
+[![Styled with TailwindCSS](https://img.shields.io/badge/Styled%20with-Tailwind%20CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 
 ## Overview
 
-This repository will stay in sync with your deployed chats on [v0.dev](https://v0.dev).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.dev](https://v0.dev).
+NEBO is a cutting-edge, futuristic web application that integrates Next.js 15 with CesiumJS for immersive 3D mapping experiences. The platform features a sleek, modern UI with interactive floating panels, real-time data visualization, and a responsive design that works across devices.
 
-## Deployment
+## Features
 
-Your project is live at:
+- **SSR-Safe CesiumJS Integration**: Fully server-side rendering compatible 3D mapping
+- **Interactive Floating Panels**: Modular UI components for displaying various data types
+- **AI Assistant Chat**: Built-in conversational AI interface for user interaction
+- **Weather & Environmental Data**: Real-time weather visualization on 3D terrain
+- **Rodent Detection System**: Simulated detection system with risk assessment
+- **Dark Mode Support**: Full theme customization with system preference detection
+- **Responsive Design**: Optimized for desktop and mobile experiences
 
-**[https://vercel.com/mo-101s-projects/v0-next-js-html-conversion](https://vercel.com/mo-101s-projects/v0-next-js-html-conversion)**
+## Project Structure
 
-## Build your app
+```
+src/
+├── app/              # Next.js App Router pages
+├── components/       # React components
+│   ├── ui/           # UI component library
+│   └── ...           # Feature-specific components
+└── lib/              # Utility functions and configuration
+```
 
-Continue building your app on:
+## Technology Stack
 
-**[https://v0.dev/chat/projects/I6PauLlkFhn](https://v0.dev/chat/projects/I6PauLlkFhn)**
+- **Frontend**: Next.js 15.2.4, React 19, TypeScript
+- **Styling**: Tailwind CSS, CSS Modules
+- **UI Components**: Radix UI primitives
+- **3D Visualization**: CesiumJS
+- **State Management**: React hooks and context
+- **Deployment**: Vercel
 
-## How It Works
+## Getting Started
 
-1. Create and modify your project using [v0.dev](https://v0.dev)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+```bash
+# Install dependencies
+pnpm install
+
+# Run development server
+pnpm dev
+
+# Build for production
+pnpm build
+
+# Start production server
+pnpm start
+```
+
+## Environment Variables
+
+The following environment variables are used in this project:
+
+```
+NEXT_PUBLIC_CESIUM_ION_TOKEN=your_cesium_token_here
+```
+
+## Architecture
+
+This application follows a modular component architecture with clear separation of concerns:
+
+- **Core Map Component**: Handles all CesiumJS interactions and terrain visualization
+- **Floating Panels**: Encapsulated UI components that can be toggled independently
+- **Shared UI Library**: Reusable UI components for consistent design language
+- **SSR Safety**: All client-side components properly marked with 'use client' directive
+
+## License
+
+MIT

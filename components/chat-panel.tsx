@@ -1,7 +1,7 @@
 "use client"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
 import { Bot, XIcon, Send } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 
@@ -21,7 +21,7 @@ export function ChatPanel({ isVisible, onClose }: ChatPanelProps) {
     {
       id: "1",
       sender: "bot",
-      text: "Hello! I'm your GeoAI assistant. How can I help you with geographical data today?",
+      text: "Hello! I'm your DeepTrack MouthPiece.. Like the One Piece. How can I help you with Mastomys Natalensis data today?",
     },
   ])
   const [inputValue, setInputValue] = useState("")
@@ -48,7 +48,7 @@ export function ChatPanel({ isVisible, onClose }: ChatPanelProps) {
 
     // Simulate AI response
     setTimeout(() => {
-      let responseText = "I'm your GeoAI assistant. I can help you analyze geographical data about Nigeria."
+      let responseText = "I'm your DeepTrack MouthPiece. I can help you analyze Mastomys Natalensis data about Nigeria."
       const lowerCaseMessage = newUserMessage.text.toLowerCase()
       if (lowerCaseMessage.includes("weather")) {
         responseText =
@@ -80,7 +80,7 @@ export function ChatPanel({ isVisible, onClose }: ChatPanelProps) {
     <div className="floating-panel bottom-4 right-4 w-80">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-lg font-semibold text-indigo-600 dark:text-indigo-300 flex items-center">
-          <Bot className="mr-2 h-5 w-5" /> GeoAI Assistant
+          <Bot className="mr-2 h-5 w-5" /> DeepTrack MouthPiece
         </h3>
         <Button
           variant="ghost"
@@ -111,10 +111,10 @@ export function ChatPanel({ isVisible, onClose }: ChatPanelProps) {
       <div className="flex space-x-2">
         <Input
           type="text"
-          placeholder="Ask about Nigeria..."
+          placeholder="Ask about Mastomys Natalensis  ..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+          onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           className="flex-1"
         />
         <Button

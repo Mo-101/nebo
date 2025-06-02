@@ -14,7 +14,8 @@ function usePanelStateManager() {
   const router = useRouter()
 
   const [showWeatherPanel, setShowWeatherPanel] = useState(searchParams.get("showWeather") === "true")
-  const [showChatPanel, setShowChatPanel] = useState(searchParams.get("showChat") === "true" || true) // Default true as per original
+  // Fix: Ensure showChatPanel defaults to true correctly (the OR operator was causing TypeScript issues)
+  const [showChatPanel, setShowChatPanel] = useState(() => searchParams.get("showChat") === "true" ? true : true) // Always true by default
   const [showRodentPanel, setShowRodentPanel] = useState(searchParams.get("showRodent") === "true")
   const [initialWeatherOverlay, setInitialWeatherOverlay] = useState(searchParams.get("weatherOverlay") === "true")
 
@@ -87,6 +88,7 @@ function MapPageContent() {
 }
 
 export default function MapPage() {
+  console.log('Rendering MapPage component');
   return (
     <Suspense fallback={<PageLoading />}>
       <MapPageContent />
