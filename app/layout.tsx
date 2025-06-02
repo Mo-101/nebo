@@ -41,7 +41,7 @@ export default function RootLayout({
         {/* It's often better to manage Cesium as an npm package if possible, but CDN is fine for quick setup. */}
         <Script
           src="https://cesium.com/downloads/cesiumjs/releases/1.118/Build/Cesium/Cesium.js"
-          strategy="lazyOnload"
+          strategy="beforeInteractive"
         />
       </body>
     </html>

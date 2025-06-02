@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useRef, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import CesiumMap, { type CesiumMapRef } from "@/components/cesium-map"
-import { ControlPanel } from "@/components/control-panel"
 import { WeatherPanel } from "@/components/weather-panel"
 import { ChatPanel } from "@/components/chat-panel"
 import { RodentPanel } from "@/components/rodent-panel"
@@ -66,20 +65,11 @@ function MapPageContent() {
   //   setShowWeatherPanel(true); // Or based on some condition
   // }, [setShowWeatherPanel]);
 
-  const handleWeatherOverlayChange = (checked: boolean) => {
-    // This state is mainly for the ControlPanel's checkbox.
-    // The CesiumMap itself handles its overlay via its own ref method.
-    setInitialWeatherOverlay(checked)
-  }
+  // Weather overlay can now be controlled directly by other components or via URL params
 
   return (
     <div className="w-full h-full relative">
       <CesiumMap ref={mapRef} initialWeatherOverlay={initialWeatherOverlay} />
-      <ControlPanel
-        mapRef={mapRef}
-        initialWeatherOverlay={initialWeatherOverlay}
-        onWeatherOverlayChange={handleWeatherOverlayChange}
-      />
       <WeatherPanel
         isVisible={showWeatherPanel}
         onClose={() => setShowWeatherPanel(false)}

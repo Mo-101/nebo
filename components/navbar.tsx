@@ -3,7 +3,7 @@
 import type React from "react"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
@@ -34,6 +34,10 @@ export function Navbar() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const { theme, setTheme } = useTheme()
   const pathname = usePathname()
+  const [mounted, setMounted] = useState(false)
+
+  // After mounting, we have access to the theme
+  useEffect(() => setMounted(true), [])
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -86,7 +90,7 @@ export function Navbar() {
               </Link>
             </Button>
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
-              {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+              {mounted && (theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />)}
             </Button>
             <Button variant="ghost" size="icon" onClick={toggleFullscreen}>
               {isFullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
@@ -120,7 +124,7 @@ export function Navbar() {
                         setIsMobileMenuOpen(false)
                       }}
                     >
-                      {theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+                      {mounted && (theme === "dark" ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />)}
                     </Button>
                     <Button
                       variant="ghost"

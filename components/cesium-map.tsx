@@ -23,23 +23,37 @@ interface CesiumMapProps {
   initialWeatherOverlay?: boolean
 }
 
-const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWeatherOverlay = false }, ref) => {
+const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>((_props, ref) => {
+  const toolbarRef = useRef<HTMLDivElement>(null)
   const cesiumContainerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<any>(null) // Stores Cesium.Viewer instance
   const weatherOverlayEntityRef = useRef<any>(null)
 
-  // Cesium Ion Access Token (Replace with your actual token, consider environment variable)
-  const CESIUM_ION_ACCESS_TOKEN =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIyNWYyZmQ2MS1iM2M4LTRjZWYtYjcyZi0xOWJmNWNhN2IzODIiLCJpZCI6MjE0OTQzLCJpYXQiOjE3MjMyOTM0NDJ9.YkpcRuaSqVjkANLeToX-KLgoHvhybOq5j9ID03U5Vpw"
-  // Bing Maps API Key (Replace with your actual key)
-  const BING_MAPS_API_KEY = "YOUR_BING_MAPS_API_KEY_HERE" // IMPORTANT: Replace this!
+  // Bing Maps Access Token (Replace with your actual key or use environment variable)
+  const BING_MAPS_API_KEY = process.env.NEXT_PUBLIC_BING_MAPS_API_KEY || "YOUR_BING_MAPS_API_KEY_HERE"
 
+  // Cesium Ion Access Token
+  const CESIUM_ION_ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJiMmRmYzcxNC0yZjM5LTQ0NzUtYWRkYi1kMjc1NzYwYTQ0NjYiLCJpZCI6MjE0OTQzLCJpYXQiOjE3MTU2NTMyNjN9.1fW--_-6R3TApPF2tAlOfXrqJadYPdwKqpPVkPetHP4"
+  const { initialWeatherOverlay = false } = _props
   useEffect(() => {
     if (typeof window !== "undefined" && window.Cesium && cesiumContainerRef.current && !viewerRef.current) {
-      window.Cesium.Ion.defaultAccessToken = CESIUM_ION_ACCESS_TOKEN
+      // Show loading overlay
+      const loadingOverlay = document.getElementById("loadingOverlay")
+      if (loadingOverlay) {
+        loadingOverlay.style.display = "flex"
+      }
 
+      console.log("Initializing Cesium with token")
+      
+      // Set Cesium Ion access token
+      window.Cesium.Ion.defaultAccessToken = CESIUM_ION_ACCESS_TOKEN
+      
+      // Configure Cesium for better CORS handling
+      window.Cesium.RequestScheduler.requestsByServer = {}
+
+      // Create the Cesium viewer with minimal UI and try with a simpler terrain provider first
       const viewer = new window.Cesium.Viewer(cesiumContainerRef.current, {
-        terrainProvider: window.Cesium.createWorldTerrain(),
+        terrainProvider: new window.Cesium.EllipsoidTerrainProvider(),
         homeButton: false,
         sceneModePicker: false,
         baseLayerPicker: false,
@@ -53,15 +67,61 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
       })
       viewerRef.current = viewer
 
-      // Initial view to Nigeria
-      viewer.camera.setView({
-        destination: window.Cesium.Cartesian3.fromDegrees(8.6753, 9.082, 1500000),
-        orientation: {
-          heading: window.Cesium.Math.toRadians(0),
-          pitch: window.Cesium.Math.toRadians(-45),
-          roll: 0.0,
-        },
-      })
+      // Load imagery using more reliable OpenStreetMap provider
+      const loadImagery = async () => {
+        try {
+          // Add OpenStreetMap as the base layer for reliability
+          const imageryLayer = viewer.imageryLayers.addImageryProvider(
+            new window.Cesium.OpenStreetMapImageryProvider({
+              url: "https://a.tile.openstreetmap.org/"
+            })
+          )
+          
+          // Try to load Cesium World Terrain after base map is loaded
+          try {
+            const terrainProvider = new window.Cesium.CesiumTerrainProvider({
+              url: window.Cesium.IonResource.fromAssetId(1)
+            })
+            viewer.terrainProvider = terrainProvider
+          } catch (terrainError) {
+            console.log("Using default ellipsoid terrain due to error:", terrainError)
+          }
+
+          // Zoom to Nigeria
+          viewer.camera.flyTo({
+            destination: window.Cesium.Cartesian3.fromDegrees(8.6753, 9.082, 1500000),
+            orientation: {
+              heading: window.Cesium.Math.toRadians(0),
+              pitch: window.Cesium.Math.toRadians(-45),
+              roll: 0.0,
+            },
+            duration: 1.0
+          })
+
+          // Hide loading overlay after imagery is loaded
+          if (loadingOverlay) {
+            loadingOverlay.style.display = "none"
+          }
+        } catch (error) {
+          console.error("Error loading imagery:", error)
+          // Hide loading overlay even if there's an error
+          if (loadingOverlay) {
+            loadingOverlay.style.display = "none"
+          }
+
+          // Fall back to default view of Nigeria
+          viewer.camera.setView({
+            destination: window.Cesium.Cartesian3.fromDegrees(8.6753, 9.082, 1500000),
+            orientation: {
+              heading: window.Cesium.Math.toRadians(0),
+              pitch: window.Cesium.Math.toRadians(-45),
+              roll: 0.0,
+            },
+          })
+        }
+      }
+
+      loadImagery()
 
       // Sample entities (cities in Nigeria)
       const cities = [
@@ -106,11 +166,10 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
         },
         show: initialWeatherOverlay,
       })
-
-      if (onReady) {
-        onReady(viewer)
-      }
     }
+  }, [])
+
+  useEffect(() => {
 
     return () => {
       // Cleanup Cesium viewer on component unmount
@@ -119,7 +178,7 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
         viewerRef.current = null
       }
     }
-  }, [onReady, initialWeatherOverlay, CESIUM_ION_ACCESS_TOKEN, BING_MAPS_API_KEY]) // Dependencies
+  }, [])
 
   useImperativeHandle(ref, () => ({
     viewer: viewerRef.current,
@@ -141,12 +200,12 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
         const imageryLayers = viewerRef.current.imageryLayers
         imageryLayers.removeAll()
         if (layerKey === "bing") {
-          if (BING_MAPS_API_KEY === "YOUR_BING_MAPS_API_KEY_HERE") {
+          if (!BING_MAPS_API_KEY || BING_MAPS_API_KEY === "YOUR_BING_MAPS_API_KEY_HERE") {
             console.warn("Bing Maps API Key is not set. Using default imagery.")
             imageryLayers.addImageryProvider(
               new window.Cesium.OpenStreetMapImageryProvider({
                 url: "https://a.tile.openstreetmap.org/",
-              }),
+              })
             )
             return
           }
@@ -155,19 +214,19 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
               url: "https://dev.virtualearth.net",
               key: BING_MAPS_API_KEY,
               mapStyle: window.Cesium.BingMapsStyle.AERIAL,
-            }),
+            })
           )
         } else if (layerKey === "osm") {
           imageryLayers.addImageryProvider(
             new window.Cesium.OpenStreetMapImageryProvider({
               url: "https://a.tile.openstreetmap.org/",
-            }),
+            })
           )
         } else if (layerKey === "esri") {
           imageryLayers.addImageryProvider(
             new window.Cesium.ArcGisMapServerImageryProvider({
               url: "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer",
-            }),
+            })
           )
         }
       }
@@ -175,7 +234,9 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
     setTerrain: (terrainKey: string) => {
       if (viewerRef.current && window.Cesium) {
         if (terrainKey === "cesium") {
-          viewerRef.current.terrainProvider = window.Cesium.createWorldTerrain()
+          viewerRef.current.terrainProvider = new window.Cesium.CesiumTerrainProvider({
+            url: window.Cesium.IonResource.fromAssetId(1)
+          })
         } else {
           viewerRef.current.terrainProvider = new window.Cesium.EllipsoidTerrainProvider()
         }
@@ -186,9 +247,20 @@ const CesiumMap = forwardRef<CesiumMapRef, CesiumMapProps>(({ onReady, initialWe
         weatherOverlayEntityRef.current.show = show
       }
     },
-  }))
+  }), [viewerRef, weatherOverlayEntityRef, BING_MAPS_API_KEY])
 
-  return <div id="cesiumContainer" ref={cesiumContainerRef} className="w-full h-full" />
+  return (
+    <>
+      <div id="cesiumContainer" ref={cesiumContainerRef} className="w-full h-full" />
+      <div id="loadingOverlay" className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-black bg-opacity-50 z-50" style={{ display: "none" }}>
+        <div className="bg-slate-800 p-6 rounded-lg shadow-xl text-center">
+          <h1 className="text-xl font-bold text-white mb-2">Loading...</h1>
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+      <div id="toolbar" ref={toolbarRef} className="absolute bottom-4 right-4 z-10"></div>
+    </>
+  )
 })
 
 CesiumMap.displayName = "CesiumMap"
